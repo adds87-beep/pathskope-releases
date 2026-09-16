@@ -3,6 +3,8 @@
 A small always-on-top card for macOS that shows what the Netskope client is
 doing, and switches it between tenants without reinstalling it.
 
+The guide, with diagrams: https://adds87-beep.github.io/pathskope-releases/
+
 Download the current build from the Releases page. Open the DMG, drag
 PathSkope to Applications, launch it from there. It is signed and notarised,
 so macOS opens it without a warning.

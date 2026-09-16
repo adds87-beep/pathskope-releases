@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PathSkope Guide</title>
+<style>
+  :root { color-scheme: light dark;
+    --fg:#1d1d1f; --muted:#6e6e73; --bg:#ffffff; --card:#f5f5f7; --line:#d2d2d7;
+    --swg:#08a7cf; --npa:#f6841f; --ok:#34c759; --warn:#ff9f0a; --bad:#ff3b30; --accent:#0a66ff; }
+  @media (prefers-color-scheme: dark) { :root {
+    --fg:#f5f5f7; --muted:#a1a1a6; --bg:#1c1c1e; --card:#2c2c2e; --line:#3a3a3c; } }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--fg);
+    font:15px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  main { max-width:900px; margin:0 auto; padding:40px 24px 80px }
+  h1 { font-size:34px; margin:0 0 6px; letter-spacing:-.02em }
+  h2 { font-size:22px; margin:44px 0 12px; letter-spacing:-.01em; padding-top:14px; border-top:1px solid var(--line) }
+  h3 { font-size:16px; margin:22px 0 6px }
+  p, li { max-width:72ch }
+  .lead { color:var(--muted); font-size:17px; margin:0 0 18px }
+  .muted { color:var(--muted) }
+  code, kbd { font:13px ui-monospace, "SF Mono", Menlo, monospace; background:var(--card); padding:1px 6px; border-radius:5px }
+  figure { margin:18px 0; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; overflow-x:auto }
+  figcaption { color:var(--muted); font-size:13px; margin-top:8px }
+  svg { display:block; max-width:100%; height:auto; font-family:-apple-system, "SF Pro Text", Helvetica, Arial, sans-serif }
+  table { border-collapse:collapse; width:100%; margin:12px 0; font-size:14px }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top }
+  th { color:var(--muted); font-weight:600; font-size:13px }
+  .steps { counter-reset:s; list-style:none; padding:0; margin:12px 0 }
+  .steps li { position:relative; padding:0 0 12px 40px; max-width:none }
+  .steps li::before { counter-increment:s; content:counter(s); position:absolute; left:0; top:1px; width:26px; height:26px; border-radius:50%;
+    background:var(--accent); color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:12px; margin:12px 0 }
+  .tile { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px }
+  .tile h3 { margin:0 0 6px; font-size:15px }
+  .tile p { margin:0; font-size:14px; color:var(--muted) }
+  nav.toc { display:flex; flex-wrap:wrap; gap:6px 14px; margin:14px 0 6px; font-size:14px }
+  nav.toc a { color:var(--accent); text-decoration:none }
+  .note { border-left:3px solid var(--warn); padding:8px 14px; background:var(--card); border-radius:0 10px 10px 0; margin:14px 0 }
+</style>
+</head>
+<body>
+<main>
+
+<h1>PathSkope</h1>
+<p class="lead">A card that shows what the Netskope client is doing, and switches it between tenants without reinstalling it.</p>
+<nav class="toc">
+  <a href="#card">The card</a><a href="#setup">Setup</a><a href="#tenants">Tenants and switching</a>
+  <a href="#window">The window</a><a href="#client">Client Configuration</a><a href="#updates">Updates</a>
+  <a href="#security">What is stored</a><a href="#helper">The helper</a><a href="#menu">Menu reference</a><a href="#problems">When something goes wrong</a>
+</nav>
+
+<h2 id="card">The card</h2>
+<p>The card floats above other windows and reads the Netskope client's own logs. It asks for no permissions and captures nothing from the screen.</p>
+<figure>
+<svg viewBox="0 0 760 420" role="img" aria-label="The PathSkope card">
+  <defs><style>.t{fill:var(--fg)} .m{fill:var(--muted)} .box{fill:var(--bg);stroke:var(--line)}</style></defs>
+  <rect x="20" y="20" width="470" height="380" rx="16" class="box"/>
+  <text x="40" y="52" class="t" font-size="13" font-weight="700" letter-spacing="2">PATHSKOPE</text>
+  <text x="40" y="70" class="m" font-size="12" font-family="ui-monospace,Menlo,monospace">▾ example.goskope.com</text>
+  <rect x="400" y="38" width="70" height="22" rx="6" fill="var(--line)"/><text x="408" y="53" class="t" font-size="10">Config ▾</text>
+  <rect x="40" y="90" width="210" height="96" rx="10" class="box"/>
+  <text x="52" y="110" font-size="11" font-weight="700" fill="var(--swg)">SWG</text>
+  <rect x="200" y="98" width="40" height="16" rx="4" fill="var(--ok)"/><text x="207" y="110" font-size="9" fill="#fff" font-weight="700">LIVE</text>
+  <text x="52" y="132" class="t" font-size="12">AU-XXX1 · pool 2</text>
+  <text x="52" y="150" class="m" font-size="11">assigned 10.0.0.0 · 28 ms</text>
+  <text x="52" y="172" class="m" font-size="11">DTLS tunnel to the steering data plane</text>
+  <rect x="270" y="90" width="200" height="96" rx="10" class="box"/>
+  <text x="282" y="110" font-size="11" font-weight="700" fill="var(--npa)">NPA</text>
+  <rect x="420" y="98" width="40" height="16" rx="4" fill="var(--ok)"/><text x="427" y="110" font-size="9" fill="#fff" font-weight="700">LIVE</text>
+  <text x="282" y="132" class="t" font-size="12">AU-XXX1 · 4 ms</text>
+  <text x="282" y="150" class="m" font-size="11">gateway 100.64.0.0</text>
+  <text x="282" y="172" class="m" font-size="11">tunnel to the gateway data plane</text>
+  <rect x="40" y="200" width="45" height="18" rx="4" fill="var(--fg)"/><text x="48" y="213" font-size="9" fill="var(--bg)" font-weight="700">LOG</text>
+  <rect x="92" y="200" width="45" height="18" rx="4" fill="var(--line)"/><text x="100" y="213" font-size="9" class="t">SWG</text>
+  <rect x="144" y="200" width="45" height="18" rx="4" fill="var(--line)"/><text x="153" y="213" font-size="9" class="t">NPA</text>
+  <text x="40" y="243" class="t" font-size="11" font-family="ui-monospace,Menlo,monospace">app.example.lab → 100.64.0.2 tcp/443 STUB</text>
+  <text x="40" y="262" class="t" font-size="11" font-family="ui-monospace,Menlo,monospace">files.example.lab → 100.64.0.3 tcp/445 STUB</text>
+  <text x="40" y="281" class="m" font-size="11" font-family="ui-monospace,Menlo,monospace">Example App · Policy A · publisher b2861cb8</text>
+  <text x="40" y="300" class="m" font-size="11" font-family="ui-monospace,Menlo,monospace">db.example.lab → BLOCKED no matching rule</text>
+  <line x1="40" y1="352" x2="470" y2="352" stroke="var(--line)"/>
+  <text x="40" y="378" class="m" font-size="11">3 hosts · <tspan fill="var(--accent)" text-decoration="underline">Client Configuration</tspan></text>
+  <text x="380" y="378" class="m" font-size="11">stub = 100.64/10</text>
+  <g font-size="12" class="t">
+    <text x="530" y="60">Tenant menu: switch, manage, unenrol</text>
+    <text x="530" y="140">SWG tunnel: state, data plane, round trip</text>
+    <text x="530" y="160">NPA tunnel: state, gateway, round trip</text>
+    <text x="530" y="240">Private apps reached, the address handed</text>
+    <text x="530" y="258">back, the policy and publisher matched</text>
+    <text x="530" y="378">Opens the Client Configuration section</text>
+  </g>
+  <g stroke="var(--muted)" stroke-dasharray="3 3" fill="none">
+    <path d="M520 56 H 250"/><path d="M520 150 H 472"/><path d="M520 246 H 300"/><path d="M520 374 H 200"/>
+  </g>
+</svg>
+<figcaption>The card, with example values. Green means the tunnel is up; orange means dialling; red means down; grey means the client is off or that side is not steered on this tenant.</figcaption>
+</figure>
+<div class="grid">
+  <div class="tile"><h3>LOG, SWG, NPA</h3><p>Three views of traffic: private app requests, SWG flows, and NPA detail.</p></div>
+  <div class="tile"><h3>GSLB</h3><p>The antenna button lists every data plane the client measured, by round trip, with the connected one marked. Click one for its history graph.</p></div>
+  <div class="tile"><h3>Manufactured failover</h3><p>Right-click a data plane in the GSLB view to add latency or fail it, and watch the client move. Released automatically.</p></div>
+  <div class="tile"><h3>Always on Top</h3><p>On: the card floats over everything, on every desktop. Off: an ordinary window with a Dock icon. Toggle it from the menu bar menu.</p></div>
+</div>
+
+<h2 id="setup">Setup</h2>
+<p>On first launch the window opens on Setup. Two things are needed once.</p>
+<ol class="steps">
+  <li><strong>Install the PathSkope Helper.</strong> The steps that need root run through one small script, installed once with your administrator password.</li>
+  <li><strong>Save a tenant.</strong> Either add the tenant the client is on now, or register one with its details: tenant name and region, org key, email, auth token, and the encryption token if the tenant uses one. PathSkope checks them against the tenant before saving.</li>
+</ol>
+<p>The Netskope client does not have to be installed for setup to complete. Without it the card has nothing to show, but a switch still writes the tenant files for whenever the client is installed and started.</p>
+
+<h2 id="tenants">Tenants and switching</h2>
+<p>Register a tenant once. From then on switching is one click from the card's tenant menu, or the Switch button in Settings, Tenants. The tenant the client is on now is shown in green.</p>
+<figure>
+<svg viewBox="0 0 900 150" role="img" aria-label="What a switch does, in order">
+  <defs><style>.b{fill:var(--bg);stroke:var(--line)} .t{fill:var(--fg)} .m{fill:var(--muted)} .a{stroke:var(--muted);fill:none}</style>
+  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/></marker></defs>
+  <g font-size="12" text-anchor="middle">
+    <rect x="10" y="30" width="120" height="60" rx="10" class="b"/><text x="70" y="55" class="t" font-weight="600">Enrol</text><text x="70" y="73" class="m" font-size="11">with saved details</text>
+    <rect x="160" y="30" width="120" height="60" rx="10" class="b"/><text x="220" y="55" class="t" font-weight="600">Stop client</text><text x="220" y="73" class="m" font-size="11">so it cannot interfere</text>
+    <rect x="310" y="30" width="120" height="60" rx="10" class="b"/><text x="370" y="55" class="t" font-weight="600">Write files</text><text x="370" y="73" class="m" font-size="11">branding, certificate</text>
+    <rect x="460" y="30" width="120" height="60" rx="10" class="b"/><text x="520" y="55" class="t" font-weight="600">Restart</text><text x="520" y="73" class="m" font-size="11">wait for the new process</text>
+    <rect x="610" y="30" width="120" height="60" rx="10" class="b"/><text x="670" y="55" class="t" font-weight="600">Tunnels</text><text x="670" y="73" class="m" font-size="11">SWG, then NPA if steered</text>
+    <rect x="760" y="30" width="130" height="60" rx="10" fill="var(--ok)" stroke="none"/><text x="825" y="55" fill="#fff" font-weight="700">Switched</text><text x="825" y="73" fill="#fff" font-size="11">verdict in the log</text>
+  </g>
+  <g class="a" marker-end="url(#ar)"><path d="M130 60 H158"/><path d="M280 60 H308"/><path d="M430 60 H458"/><path d="M580 60 H608"/><path d="M730 60 H758"/></g>
+  <text x="450" y="125" text-anchor="middle" class="m" font-size="12">About thirty seconds. Each step waits for the client's own log to confirm the one before it.</text>
+</svg>
+<figcaption>Internet traffic and private applications are affected while the switch runs.</figcaption>
+</figure>
+<table>
+  <tr><th>Action</th><th>Where</th><th>What it does</th></tr>
+  <tr><td><strong>Switch</strong></td><td>Card tenant menu, or Settings, Tenants</td><td>Enrols as the user saved with the tenant and moves the client to it.</td></tr>
+  <tr><td><strong>Switch, sign in via IdP</strong></td><td>The tenant's menu (⋯) in Settings, Tenants</td><td>Gives the client the tenant and no user, so the tenant's identity provider asks whoever is at the keyboard to sign in.</td></tr>
+  <tr><td><strong>Unenrol the Client</strong></td><td>Last item of the card's tenant menu</td><td>Backs up the client's enrolment, encrypted, removes it, and restarts the client so it asks for a tenant.</td></tr>
+  <tr><td><strong>Register a Tenant</strong></td><td>Settings, Tenants</td><td>Saves a tenant's details after checking them against the tenant.</td></tr>
+  <tr><td><strong>Remove</strong></td><td>The tenant's menu (⋯)</td><td>Deletes the saved tenant and everything stored for it.</td></tr>
+</table>
+<p>While a switch runs, a progress window shows the three stages and a Details log. <strong>Stop switch</strong> ends it and leaves the client running. <strong>Stop waiting</strong> only stops watching for the tunnels. After a failed switch, <strong>Enrol again from fresh</strong> runs it again with the cached files ignored.</p>
+
+<h2 id="window">The window</h2>
+<p>Everything that is not the card is one window: Settings from the menu bar menu, or <kbd>⌘,</kbd>.</p>
+<figure>
+<svg viewBox="0 0 760 250" role="img" aria-label="The window's sections">
+  <defs><style>.b{fill:var(--bg);stroke:var(--line)} .t{fill:var(--fg)} .m{fill:var(--muted)}</style></defs>
+  <rect x="10" y="10" width="740" height="230" rx="12" class="b"/>
+  <rect x="10" y="10" width="190" height="230" rx="12" fill="var(--card)"/>
+  <g font-size="13" class="t">
+    <rect x="22" y="34" width="166" height="26" rx="7" fill="var(--accent)"/><text x="34" y="52" fill="#fff" font-weight="600">General</text>
+    <text x="34" y="86">Tenants</text><text x="34" y="114">Client Configuration</text><text x="34" y="142">Updates</text><text x="34" y="170">Security</text><text x="34" y="198">Setup</text>
+  </g>
+  <g font-size="12">
+    <text x="225" y="52" class="t" font-weight="600">General</text><text x="225" y="70" class="m">Start at login, appearance, menu bar icon, reset the card's size.</text>
+    <text x="225" y="98" class="t" font-weight="600">Tenants</text><text x="225" y="116" class="m">Saved tenants, switch, sign in via IdP, remove, register.</text>
+    <text x="225" y="144" class="t" font-weight="600">Client Configuration</text><text x="225" y="162" class="m">What the client is configured with, NPA policy, DC pinning, logs.</text>
+    <text x="225" y="190" class="t" font-weight="600">Updates</text><text x="225" y="208" class="m">This build, recommended, beta, previous; the helper.</text>
+    <text x="510" y="52" class="t" font-weight="600">Security</text><text x="510" y="70" class="m">Touch ID for privileged actions; where things are stored.</text>
+    <text x="510" y="98" class="t" font-weight="600">Setup</text><text x="510" y="116" class="m">The first run checks, re-runnable any time.</text>
+  </g>
+</svg>
+</figure>
+
+<h2 id="client">Client Configuration</h2>
+<p>Opened from the bottom of the card, or Tools in the menu. Read from the client's own files; anything named like a key, token or password is left out.</p>
+<div class="grid">
+  <div class="tile"><h3>Overview</h3><p>Tenant and enrolled user, client version and configuration, steering configuration and traffic mode, device classification, client status, and every client setting with a filter.</p></div>
+  <div class="tile"><h3>NPA Policy</h3><p>Every private app rule the client holds: app, policy, hosts, ports, publishers. Searchable.</p></div>
+  <div class="tile"><h3>DC Pinning</h3><p>Every data plane worldwide from the Netskope trust portal. Pin the client to one, or to a country, and unpin.</p></div>
+  <div class="tile"><h3>Logs</h3><p>PathSkope's own log: switches, updates and the app. Tick Everything for the tunnel chatter.</p></div>
+</div>
+
+<h2 id="updates">Updates</h2>
+<figure>
+<svg viewBox="0 0 900 120" role="img" aria-label="How an update reaches the Mac">
+  <defs><style>.b{fill:var(--bg);stroke:var(--line)} .t{fill:var(--fg)} .m{fill:var(--muted)} .a{stroke:var(--muted);fill:none}</style>
+  <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/></marker></defs>
+  <g font-size="12" text-anchor="middle">
+    <rect x="10" y="25" width="150" height="60" rx="10" class="b"/><text x="85" y="50" class="t" font-weight="600">Release list</text><text x="85" y="68" class="m" font-size="11">read once a day</text>
+    <rect x="195" y="25" width="150" height="60" rx="10" class="b"/><text x="270" y="50" class="t" font-weight="600">Settings, Updates</text><text x="270" y="68" class="m" font-size="11">recommended, beta, previous</text>
+    <rect x="380" y="25" width="150" height="60" rx="10" class="b"/><text x="455" y="50" class="t" font-weight="600">Install</text><text x="455" y="68" class="m" font-size="11">you press the button</text>
+    <rect x="565" y="25" width="150" height="60" rx="10" class="b"/><text x="640" y="50" class="t" font-weight="600">Checked</text><text x="640" y="68" class="m" font-size="11">signature, team, Gatekeeper</text>
+    <rect x="750" y="25" width="140" height="60" rx="10" fill="var(--ok)" stroke="none"/><text x="820" y="50" fill="#fff" font-weight="700">Replaced</text><text x="820" y="68" fill="#fff" font-size="11">and relaunched</text>
+  </g>
+  <g class="a" marker-end="url(#ar2)"><path d="M160 55 H193"/><path d="M345 55 H378"/><path d="M530 55 H563"/><path d="M715 55 H748"/></g>
+</svg>
+</figure>
+<p>Nothing is installed without pressing Install. Tenants and settings are kept across updates. Beta builds are offered only if you turn that on. Previous versions are listed so you can go back. The helper has its own line in the same section: when a build ships a newer helper, install it there.</p>
+
+<h2 id="security">What is stored, and how</h2>
+<figure>
+<svg viewBox="0 0 900 200" role="img" aria-label="How stored details are protected">
+  <defs><style>.b{fill:var(--bg);stroke:var(--line)} .t{fill:var(--fg)} .m{fill:var(--muted)} .a{stroke:var(--muted);fill:none}</style>
+  <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--muted)"/></marker></defs>
+  <g font-size="12">
+    <rect x="10" y="20" width="200" height="70" rx="10" class="b"/><text x="24" y="45" class="t" font-weight="600">Secure Enclave</text><text x="24" y="63" class="m" font-size="11">a key that never leaves the chip</text><text x="24" y="79" class="m" font-size="11">released only after Touch ID</text>
+    <rect x="270" y="20" width="180" height="70" rx="10" class="b"/><text x="284" y="45" class="t" font-weight="600">Data key</text><text x="284" y="63" class="m" font-size="11">wrapped by the enclave key</text><text x="284" y="79" class="m" font-size="11">dropped after every job</text>
+    <rect x="510" y="20" width="380" height="160" rx="10" class="b"/><text x="524" y="45" class="t" font-weight="600">Per tenant, encrypted</text>
+    <text x="524" y="68" class="m" font-size="11" font-family="ui-monospace,Menlo,monospace">~/Library/Application Support/PathSkope/example.goskope.com/Data/</text>
+    <g class="t" font-size="12"><text x="540" y="95">auth token and encryption token</text><text x="540" y="115">org key</text><text x="540" y="135">branding file</text><text x="540" y="155">user certificate</text></g>
+    <text x="700" y="115" class="m" font-size="11">each a sealed file that is</text><text x="700" y="131" class="m" font-size="11">unreadable anywhere,</text><text x="700" y="147" class="m" font-size="11">including here, without you</text>
+  </g>
+  <g class="a" marker-end="url(#ar3)"><path d="M210 55 H268"/><path d="M450 55 H508"/></g>
+  <text x="10" y="150" class="m" font-size="12">The tenant list beside it holds only names, addresses, the saved email and dates: what the menu needs before you have touched Touch ID.</text>
+  <text x="10" y="172" class="m" font-size="12">PathSkope's own log never contains a token, a key or a certificate.</text>
+</svg>
+</figure>
+<p>Security, in Settings, has one switch: use Touch ID instead of a password for privileged actions. Switching a tenant, restarting the client, pinning and shaping each ask before they run, and one approval covers a whole switch.</p>
+
+<h2 id="helper">The helper</h2>
+<p>Writing the client's tenant files, restarting it, pinning a data plane and shaping traffic all need root. They run through one small script, the PathSkope Helper, installed once with your administrator password. It accepts a fixed set of commands, checks every argument, and cannot be used as a general root shell. Settings, Updates shows the installed version; when a build ships a newer one, install it there, and roll back the same way if it misbehaves. Removing it stops switching, pinning and shaping; everything else carries on.</p>
+
+<h2 id="menu">Menu reference</h2>
+<table>
+  <tr><th>Menu bar menu</th><th></th></tr>
+  <tr><td>Show Card</td><td>Brings the card back if it was closed or hidden.</td></tr>
+  <tr><td>Always on Top</td><td>Floating over everything, or an ordinary window.</td></tr>
+  <tr><td>Tools ▸ Switch Netskope Tenant</td><td>Opens Tenants.</td></tr>
+  <tr><td>Tools ▸ DC Pinning</td><td>Opens Client Configuration, DC Pinning.</td></tr>
+  <tr><td>Tools ▸ Live Traffic Log</td><td>Shows SWG flows on the card.</td></tr>
+  <tr><td>Tools ▸ Restore All Data Planes</td><td>Removes any manufactured latency or failure.</td></tr>
+  <tr><td>Tools ▸ Unenrol the Client</td><td>Backs up and removes the client's enrolment.</td></tr>
+  <tr><td>Update available</td><td>Appears when a newer build is published. Opens Updates.</td></tr>
+  <tr><td>Logs</td><td>Opens Client Configuration, Logs.</td></tr>
+  <tr><td>Settings <span class="muted">⌘,</span></td><td>The window.</td></tr>
+</table>
+
+<h2 id="problems">When something goes wrong</h2>
+<div class="grid">
+  <div class="tile"><h3>A switch sits on Restarting client</h3><p>Press Stop switch. The client is left running. Then Enrol again from fresh, or switch again.</p></div>
+  <div class="tile"><h3>The tenant refused the enrolment</h3><p>The service sometimes times out and reports it as a refusal. Wait a moment and switch again. If it persists, check the tenant's org key and auth token in Settings, Tenants.</p></div>
+  <div class="tile"><h3>"Stored details could not be read"</h3><p>The saved details are intact but this build could not open them. Install the recommended build from Settings, Updates.</p></div>
+  <div class="tile"><h3>NPA shows Not required</h3><p>That tenant does not steer Private Access. Nothing to fix. The same applies to Endpoint DLP and Borderless SD-WAN.</p></div>
+  <div class="tile"><h3>The card is behind other windows</h3><p>Turn Always on Top on from the menu bar menu. With it off, the Dock icon, Mission Control and ⌘-Tab bring it back.</p></div>
+  <div class="tile"><h3>Details for a switch</h3><p>Every switch is in Client Configuration, Logs, with the client's own failure lines copied in beside PathSkope's.</p></div>
+</div>
+
+<p class="muted" style="margin-top:40px">All names and addresses in this guide are examples.</p>
+</main>
+</body>
+</html>
